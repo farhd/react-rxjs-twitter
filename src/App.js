@@ -1,9 +1,19 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from './logo.svg'
+import './App.css'
+
+import { tweets } from './common/api'
+import { useEffect } from 'react'
 
 function App() {
+  useEffect(() => {
+    tweets.subscribe(console.log.bind(console))
+    return () => {
+      tweets.unsubscribe(console.log.bind(console))
+    }
+  }, [])
+
   return (
-    <div className="App">
+    <div className="App m-4 p-4">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
@@ -19,7 +29,7 @@ function App() {
         </a>
       </header>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
