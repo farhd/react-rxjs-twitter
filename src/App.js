@@ -1,33 +1,30 @@
-import logo from './logo.svg'
+import { useState, useEffect } from 'react'
+
+import Store from './store'
+
+import Sidebar from './components/Sidebar'
+import Feed from './components/Feed'
+import Widgets from './components/Widgets'
+
 import './App.css'
 
-import { tweets } from './common/api'
-import { useEffect } from 'react'
-
 function App() {
+  const [state, setState] = useState(Store.initialState)
+
   useEffect(() => {
-    tweets.subscribe(console.log.bind(console))
-    return () => {
-      tweets.unsubscribe(console.log.bind(console))
-    }
+    console.log(state.tweets)
+  }, [state.tweets])
+
+  useEffect(() => {
+    Store.subscribe(setState)
+    Store.init()
   }, [])
 
   return (
-    <div className="App m-4 p-4">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App flex justify-center mx-auto h-screen">
+      <Sidebar />
+      <Feed values={Object.values(state.tweets)} />
+      <Widgets />
     </div>
   )
 }
