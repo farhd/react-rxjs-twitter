@@ -1,31 +1,32 @@
 import { Subject } from 'rxjs'
 
-import { tweets, tweets as tweetsApi } from '../common/api'
+import { tweets as tweetsApi } from '../common/api'
 
 const subject = new Subject()
 const initialState = {
   tweets: {},
-  likes: 0,
+  likesCount: 0,
   filter: '', // all | liked
 }
 
 let state = initialState
 
+function updateState(newState) {
+  state = { ...state, ...newState }
+  subject.next(state)
+}
+
 const Store = {
   initialState,
   init: () => {
-    state = { ...initialState }
-    subject.next(state)
+    updateState(initialState)
   },
   subscribe: (setState) => subject.subscribe(setState),
   clearFeed: () => {
-    state = { ...initialState }
-    subject.next(state)
+    updateState(initialState)
   },
   updateTweet: ({ id, payload }) => {
-    console.log('Store.updateTweet', id, payload)
-    state = {
-      ...state,
+    updateState({
       tweets: {
         ...state.tweets,
         [id]: {
@@ -33,32 +34,46 @@ const Store = {
           ...payload,
         },
       },
-    }
-    subject.next(state)
+    })
+    recountLikes()
   },
   addTweet: (tweet) => {
-    console.log('Store.addTweet', tweet)
-    state = {
-      ...state,
+    updateState({
       tweets: {
         [tweet.id]: tweet,
         ...state.tweets,
       },
-    }
-    subject.next(state)
+    })
+  },
+  updateLikesCount: (newCount) => {
+    updateState({
+      likesCount: newCount,
+    })
   },
 }
 
-export default Store
+function recountLikes() {
+  // recount likes
+  const newLikesCount = Object.values(state.tweets).filter(
+    (tweet) => tweet.isLiked
+  ).length
+  Store.updateLikesCount(newLikesCount)
+}
 
-const tweetsApiSub = tweetsApi.subscribe((tweet) => {
-  console.log('tweetsApiSub', tweet)
+Store.subscribe((newState) => {
+  console.log('[Store]', newState)
+})
+
+tweetsApi.subscribe((tweet) => {
+  console.log('[tweetsApi]', tweet)
   Store.addTweet({
     ...tweet,
     id: Date.now(),
     isLiked: false,
   })
 })
+
+export default Store
 
 // const timer = setInterval(() => {
 //   console.log('purging old items', feed)
