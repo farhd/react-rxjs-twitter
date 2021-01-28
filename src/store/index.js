@@ -28,26 +28,29 @@ const Store = {
     updateState(initialState)
   },
   updateTweet: ({ id, payload }) => {
-    updateState({
-      tweets: {
-        ...state.tweets,
+    let tweets = { ...state.tweets }
+    if (payload === null) {
+      delete tweets[id]
+    } else {
+      tweets = {
+        ...tweets,
         [id]: {
           ...state.tweets[id],
           ...payload,
         },
-      },
+      }
+    }
+    updateState({
+      tweets,
     })
-    recountLikes()
+    recountLikes(tweets)
+  },
+  removeTweet: ({ id }) => {
+    Store.updateTweet({ id, payload: null })
   },
   addTweet: (tweet) => {
     const timerId = setInterval(() => {
-      let tweetsCopy = { ...state.tweets }
-      delete tweetsCopy[tweet.id]
-      updateState({
-        tweets: {
-          ...tweetsCopy,
-        },
-      })
+      Store.removeTweet({ id: tweet.id })
     }, 30000)
     updateState({
       tweets: {
@@ -71,11 +74,10 @@ const Store = {
   },
 }
 
-function recountLikes() {
+function recountLikes(tweets) {
   // recount likes
-  const newLikesCount = Object.values(state.tweets).filter(
-    (tweet) => tweet.isLiked
-  ).length
+  const newLikesCount = Object.values(tweets).filter((tweet) => tweet.isLiked)
+    .length
   Store.updateLikesCount(newLikesCount)
 }
 
