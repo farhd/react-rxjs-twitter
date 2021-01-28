@@ -1,12 +1,13 @@
 import { Subject } from 'rxjs'
 
 import { tweets as tweetsApi } from '../common/api'
+import { filters } from '../common/const'
 
 const subject = new Subject()
 const initialState = {
   tweets: {},
   likesCount: 0,
-  filter: '', // all | liked
+  filter: filters.ALL,
 }
 
 let state = initialState
@@ -23,6 +24,7 @@ const Store = {
   },
   subscribe: (setState) => subject.subscribe(setState),
   clearFeed: () => {
+    Object.values(state.tweets).forEach((tweet) => clearTimeout(tweet.timerId))
     updateState(initialState)
   },
   updateTweet: ({ id, payload }) => {
@@ -38,9 +40,21 @@ const Store = {
     recountLikes()
   },
   addTweet: (tweet) => {
+    const timerId = setInterval(() => {
+      let tweetsCopy = { ...state.tweets }
+      delete tweetsCopy[tweet.id]
+      updateState({
+        tweets: {
+          ...tweetsCopy,
+        },
+      })
+    }, 30000)
     updateState({
       tweets: {
-        [tweet.id]: tweet,
+        [tweet.id]: {
+          ...tweet,
+          timerId,
+        },
         ...state.tweets,
       },
     })
@@ -48,6 +62,11 @@ const Store = {
   updateLikesCount: (newCount) => {
     updateState({
       likesCount: newCount,
+    })
+  },
+  updateFilter: (newFilter = filters.ALL) => {
+    updateState({
+      filter: newFilter,
     })
   },
 }

@@ -1,8 +1,9 @@
 import Store from '../store/index'
 
+import FeedFilter from './Feed/Filter'
 import Tweet from './Tweet'
 
-function Feed({ tweets = [], likesCount = 0 }) {
+function Feed({ tweets = [], likesCount = 0, filter }) {
   const Tweets = () => {
     return tweets.map((item, i) => {
       return <Tweet key={i} {...item} />
@@ -14,13 +15,7 @@ function Feed({ tweets = [], likesCount = 0 }) {
       <div className="border-b p-2">[Feed]</div>
       <div className="FeedControls border-b flex p-2 justify-between">
         <div className="mx-4">Likes: {likesCount}</div>
-        <div className="mx-4">
-          <span>Filter: </span>
-          <button className="border rounded-tl rounded-bl px-2">all</button>
-          <button className="border border-l-0 rounded-tr rounded-br px-2">
-            liked
-          </button>
-        </div>
+        <FeedFilter filter={filter} />
         <div className="mx-4">
           <button
             className="border border-red-400 rounded px-2 text-red-600"

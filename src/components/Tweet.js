@@ -17,7 +17,11 @@ function Tweet(tweet) {
   }
 
   return (
-    <div className="Tweet border-b px-3 py-2 pb-3">
+    <div
+      className={`Tweet border-b border-gray-300 px-3 py-2 pb-3 ${
+        isLiked ? 'bg-blue-100' : ''
+      }`}
+    >
       <TweetHeader accountName={account} date={timestamp} />
       <TweetBody content={content} />
       <TweetFooter onLiked={onLiked} isLiked={isLiked} />

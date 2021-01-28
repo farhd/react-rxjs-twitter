@@ -7,8 +7,8 @@ const createTweetSource = (frequency, account, attribute) => {
       account,
       timestamp: Date.now(),
       content: `${attribute} Tweet number ${i + 1}`,
-    })),
-    take(2)
+    }))
+    // take(2)
   )
 }
 
