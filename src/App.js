@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-import Store from './store'
+import Store, { State } from './store'
 import { filters } from './common/const'
 
 import Sidebar from './components/Sidebar'
@@ -10,13 +10,16 @@ import Widgets from './components/Widgets'
 import './App.css'
 
 function App() {
-  const [state, setState] = useState(Store.initialState)
+  var [init, setInit] = useState(false)
+  var [state, setState] = useState(Store.initialState)
   const [filteredTweets, setFilteredTweets] = useState([])
 
   useEffect(() => {
-    Store.subscribe(setState)
-    Store.init()
-  }, [])
+    if (!init) {
+      setInit(true)
+      State.subscribe(setState)
+    }
+  }, [init])
 
   useEffect(() => {
     let tweets = []

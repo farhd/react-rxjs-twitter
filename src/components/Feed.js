@@ -1,13 +1,17 @@
-import Store from '../store'
+import { Actions } from '../store'
 
 import FeedFilter from './Feed/Filter'
 import Tweet from './Tweet'
 
 function Feed({ tweets = [], likesCount = 0, filter }) {
   const Tweets = () => {
-    return tweets.map((item, i) => {
-      return <Tweet key={i} {...item} />
-    })
+    return tweets
+      .sort((a, b) => {
+        return b.timestamp - a.timestamp
+      })
+      .map((item, i) => {
+        return <Tweet key={i} {...item} />
+      })
   }
 
   return (
@@ -19,7 +23,7 @@ function Feed({ tweets = [], likesCount = 0, filter }) {
         <div className="mx-4">
           <button
             className="border border-red-400 rounded px-2 text-red-600"
-            onClick={() => Store.clearFeed()}
+            onClick={() => Actions.clearFeed()}
           >
             Clear tweets
           </button>

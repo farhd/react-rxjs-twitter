@@ -1,4 +1,4 @@
-import Store from '../store'
+import { Actions } from '../store'
 
 import TweetHeader from './Tweet/Header'
 import TweetBody from './Tweet/Body'
@@ -7,7 +7,7 @@ import TweetFooter from './Tweet/Footer'
 function Tweet(tweet) {
   const { account = '', content = '', timestamp = 0, isLiked = false } = tweet
   const onLiked = () => {
-    Store.updateTweet({
+    Actions.updateTweet({
       id: tweet.id,
       payload: {
         ...tweet,
@@ -22,7 +22,10 @@ function Tweet(tweet) {
         isLiked ? 'bg-blue-100' : ''
       }`}
     >
-      <TweetHeader accountName={account} date={timestamp} />
+      <TweetHeader
+        accountName={account}
+        date={new Date(timestamp).toLocaleString()}
+      />
       <TweetBody content={content} />
       <TweetFooter onLiked={onLiked} isLiked={isLiked} />
     </div>

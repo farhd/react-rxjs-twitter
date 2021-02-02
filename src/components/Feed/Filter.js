@@ -1,4 +1,4 @@
-import Store from '../../store'
+import { Actions } from '../../store'
 import { filters } from '../../common/const'
 
 function FeedFilter({ filter = filters.ALL }) {
@@ -9,7 +9,7 @@ function FeedFilter({ filter = filters.ALL }) {
         className={`border rounded-tl rounded-bl px-2 ${
           filter === filters.ALL ? 'bg-blue-200' : ''
         }`}
-        onClick={() => Store.updateFilter(filters.ALL)}
+        onClick={() => Actions.updateFilter(filters.ALL)}
       >
         all
       </button>
@@ -17,7 +17,7 @@ function FeedFilter({ filter = filters.ALL }) {
         className={`border border-l-0 rounded-tr rounded-br px-2 ${
           filter === filters.LIKED ? 'bg-blue-200' : ''
         }`}
-        onClick={() => Store.updateFilter(filters.LIKED)}
+        onClick={() => Actions.updateFilter(filters.LIKED)}
       >
         liked
       </button>

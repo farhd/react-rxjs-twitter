@@ -1,4 +1,5 @@
-import { Subject } from 'rxjs'
+import { Subject, pipe } from 'rxjs'
+import { scan, map } from 'rxjs/operators'
 
 import { tweets as tweetsApi } from '../common/api'
 import { filters } from '../common/const'
@@ -10,81 +11,101 @@ const initialState = {
   filter: filters.ALL,
 }
 
-let state = initialState
-
-function updateState(newState, from) {
-  state = { ...state, ...newState, from }
-  subject.next(state)
-}
-
 const Store = {
   initialState,
-  init: () => {
-    updateState(initialState)
-  },
-  subscribe: (setState) => subject.subscribe(setState),
-  clearFeed: () => {
-    Object.values(state.tweets).forEach((tweet) => clearTimeout(tweet.timerId))
-    updateState(initialState)
-  },
-  updateTweet: ({ id, payload }) => {
-    let tweets = { ...state.tweets }
-    if (payload === null) {
-      clearTimeout()
-      delete tweets[id]
-    } else {
-      tweets = {
-        ...tweets,
-        [id]: {
-          ...state.tweets[id],
-          ...payload,
-        },
-      }
-    }
-    updateState({
-      tweets,
-    })
-    recountLikes(tweets)
-  },
-  removeTweet: ({ id }) => {
-    Store.updateTweet({ id, payload: null, from: 'removeTweet' })
-  },
-  addTweet: (tweet) => {
-    updateState({
-      tweets: {
-        [tweet.id]: {
-          ...tweet,
-        },
-        ...state.tweets,
+  Actions: (update) => {
+    return {
+      clearFeed: () => {
+        // Object.values(state.tweets).forEach((tweet) =>
+        //   clearTimeout(tweet.timerId)
+        // )
+        update((state) => {
+          state = initialState
+          return state
+        })
       },
-    })
-  },
-  updateLikesCount: (newCount) => {
-    updateState({
-      likesCount: newCount,
-    })
-  },
-  updateFilter: (newFilter = filters.ALL) => {
-    updateState({
-      filter: newFilter,
-    })
+      updateTweet: ({ id, payload, from }) => {
+        update((state) => {
+          let tweets = { ...state.tweets }
+          if (payload === null) {
+            clearTimeout()
+            delete tweets[id]
+          } else {
+            tweets = {
+              ...tweets,
+              [id]: {
+                ...state.tweets[id],
+                ...payload,
+              },
+            }
+          }
+          return { ...state, tweets, likesCount: recountLikes(tweets) }
+        })
+      },
+      removeTweet: ({ id }) => {
+        Actions.updateTweet({ id, payload: null, from: 'removeTweet' })
+      },
+      addTweet: (tweet) => {
+        update((state) => {
+          return {
+            ...state,
+            tweets: {
+              ...state.tweets,
+              [tweet.id]: {
+                ...tweet,
+                // timerId,
+              },
+            },
+          }
+        })
+      },
+      updateLikesCount: (newCount) => {
+        update((state) => {
+          return {
+            ...state,
+            likesCount: newCount,
+          }
+        })
+      },
+      updateFilter: (newFilter = filters.ALL) => {
+        update((state) => {
+          return {
+            ...state,
+            filter: newFilter,
+          }
+        })
+      },
+    }
   },
 }
+
+const update = (payload) => {
+  return subject.next(payload)
+}
+export const State = subject.pipe(
+  scan((state, patch) => {
+    return patch(state)
+  }, Store.initialState)
+)
+export const Actions = Store.Actions(update)
 
 function recountLikes(tweets) {
   // recount likes
-  const newLikesCount = Object.values(tweets).filter((tweet) => tweet.isLiked)
-    .length
-  Store.updateLikesCount(newLikesCount)
+  return Object.values(tweets).filter((tweet) => tweet.isLiked).length
 }
 
+// subject.subscribe((newState) => {
+//   console.log('[Store]', newState)
+// })
+
 tweetsApi.subscribe((tweet) => {
-  const id = Date.now()
   console.log('[tweetsApi]', tweet)
+
+  const id = Date.now()
   const timerId = setInterval(() => {
-    Store.removeTweet({ id })
+    Actions.removeTweet({ id })
   }, 30000)
-  Store.addTweet({
+  Actions.addTweet({
     ...tweet,
     id,
     timerId: timerId,
