@@ -37,7 +37,7 @@ function App() {
   }, [state.filter, state.tweets])
 
   return (
-    <div className="App flex justify-center mx-auto h-screen">
+    <div className="App flex justify-center mx-auto min-h-screen h-full">
       <Sidebar />
       <Feed {...state} tweets={filteredTweets} />
       <Widgets />
