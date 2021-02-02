@@ -12,8 +12,8 @@ const initialState = {
 
 let state = initialState
 
-function updateState(newState) {
-  state = { ...state, ...newState }
+function updateState(newState, from) {
+  state = { ...state, ...newState, from }
   subject.next(state)
 }
 
@@ -21,6 +21,11 @@ const Store = {
   initialState,
   init: () => {
     updateState(initialState)
+    setTimeout(() => {
+      const tweets = { ...state.tweets }
+      const tweetsArr = Object.values(tweets)
+      for (let i = tweetsArr.length - 1; i >= 0; --i) {}
+    }, 2000)
   },
   subscribe: (setState) => subject.subscribe(setState),
   clearFeed: () => {
@@ -30,6 +35,7 @@ const Store = {
   updateTweet: ({ id, payload }) => {
     let tweets = { ...state.tweets }
     if (payload === null) {
+      clearTimeout()
       delete tweets[id]
     } else {
       tweets = {
@@ -46,17 +52,13 @@ const Store = {
     recountLikes(tweets)
   },
   removeTweet: ({ id }) => {
-    Store.updateTweet({ id, payload: null })
+    Store.updateTweet({ id, payload: null, from: 'removeTweet' })
   },
   addTweet: (tweet) => {
-    const timerId = setInterval(() => {
-      Store.removeTweet({ id: tweet.id })
-    }, 30000)
     updateState({
       tweets: {
         [tweet.id]: {
           ...tweet,
-          timerId,
         },
         ...state.tweets,
       },
@@ -81,30 +83,18 @@ function recountLikes(tweets) {
   Store.updateLikesCount(newLikesCount)
 }
 
-Store.subscribe((newState) => {
-  console.log('[Store]', newState)
-})
-
 tweetsApi.subscribe((tweet) => {
+  const id = Date.now()
   console.log('[tweetsApi]', tweet)
+  const timerId = setInterval(() => {
+    Store.removeTweet({ id })
+  }, 30000)
   Store.addTweet({
     ...tweet,
-    id: Date.now(),
+    id,
+    timerId: timerId,
     isLiked: false,
   })
 })
 
 export default Store
-
-// const timer = setInterval(() => {
-//   console.log('purging old items', feed)
-//   const oldSubfeed = [...feed].reverse().filter((item) => {
-//     return (Date.now() - item.timestamp) / 1000 > 10
-//   })
-//   console.log(oldSubfeed)
-// }, 5000)
-
-// return () => {
-//   subscription.unsubscribe()
-//   clearInterval(timer)
-// }

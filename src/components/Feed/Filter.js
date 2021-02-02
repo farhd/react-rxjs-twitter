@@ -1,4 +1,4 @@
-import Store from '../../store/index'
+import Store from '../../store'
 import { filters } from '../../common/const'
 
 function FeedFilter({ filter = filters.ALL }) {

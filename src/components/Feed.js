@@ -1,4 +1,4 @@
-import Store from '../store/index'
+import Store from '../store'
 
 import FeedFilter from './Feed/Filter'
 import Tweet from './Tweet'
