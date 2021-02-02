@@ -21,11 +21,6 @@ const Store = {
   initialState,
   init: () => {
     updateState(initialState)
-    setTimeout(() => {
-      const tweets = { ...state.tweets }
-      const tweetsArr = Object.values(tweets)
-      for (let i = tweetsArr.length - 1; i >= 0; --i) {}
-    }, 2000)
   },
   subscribe: (setState) => subject.subscribe(setState),
   clearFeed: () => {
